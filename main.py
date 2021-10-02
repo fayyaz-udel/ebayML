@@ -12,15 +12,19 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-X, x_quiz, y = preprocess("./data/train.tsv", "./data/quiz.tsv", False)
+X, x_quiz, y = preprocess("./data/train.tsv", "./data/quiz.tsv", 3000000, False)
+
+X = np.asarray(X).astype('float32')
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.1, random_state=42)
 
 normalizer = preprocessing.Normalization(axis=-1)
 normalizer.adapt(np.array(X_train))
 
-model = build_and_compile_model()
+model = build_and_compile_model(normalizer)
 history = train_model(model, X_train, y_train)
+
+print(model.predict(x_quiz))
 
 # np.savetxt("./data/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
 logging.info("finished")
