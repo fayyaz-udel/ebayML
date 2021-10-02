@@ -120,9 +120,15 @@ def add_binary_feature(original_df, feature_df, feature_name, one_value):
 
 
 def add_datetime_feature(original_df, feature_df, feature_name):
-    feature_df[str(feature_name) + "_hour_of_day"] = pd.to_datetime(original_df[feature_name]).dt.hour
-    feature_df[str(feature_name) + "_day_of_week"] = pd.to_datetime(original_df[feature_name]).dt.dayofweek
-    feature_df[str(feature_name) + "_day_of_month"] = pd.to_datetime(original_df[feature_name]).dt.day
-    feature_df[str(feature_name) + "_month_of_year"] = pd.to_datetime(original_df[feature_name]).dt.month
+    logging.info("30")
+    date_time = pd.to_datetime(original_df[feature_name])
+    logging.info("31")
+    feature_df[str(feature_name) + "_hour_of_day"] = date_time.dt.hour
+    logging.info("32")
+    feature_df[str(feature_name) + "_day_of_week"] = date_time.dt.dayofweek
+    logging.info("33")
+    feature_df[str(feature_name) + "_day_of_month"] = date_time.dt.day
+    logging.info("34")
+    feature_df[str(feature_name) + "_month_of_year"] = date_time.dt.month
 
     return None
