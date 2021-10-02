@@ -34,7 +34,7 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("13")
     add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
-    label = calculate_label(original_df[:train_end_index])
+    label = calculate_label(original_df[:train_end_index], "acceptance_scan_timestamp")
 
     feature_df = feature_df.fillna(0)
     label = label.fillna(0)
@@ -71,21 +71,21 @@ def clean_dataset(df):
     df = df[df["carrier_max_estimate"] >= 0]
 
     df = df[
-        (pd.to_datetime(df["delivery_date"]) - pd.to_datetime(df["payment_datetime"].str.slice(0, 10))).dt.days >= 0]
+        (pd.to_datetime(df["delivery_date"]) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10))).dt.days >= 0]
     logging.info("34")
     df = df[
-        (pd.to_datetime(df["payment_datetime"].str.slice(0, 10)) - pd.to_datetime(
-            df["acceptance_scan_timestamp"].str.slice(0, 10))).dt.days >= 0]
+        (pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10)) - pd.to_datetime(
+            df["payment_datetime"].str.slice(0, 10))).dt.days >= 0]
 
     return df
 
 
-def calculate_label(original_df):
-    start = pd.to_datetime(original_df["payment_datetime"].str.slice(0, 10))  # .apply(lambda x: x.date())
+def calculate_label(original_df, start_point):
+    start = pd.to_datetime(original_df[start_point].str.slice(0, 10))
     logging.info("100")
-    end = pd.to_datetime(original_df["delivery_date"])  # .apply(lambda x: x.date())
+    end = pd.to_datetime(original_df["delivery_date"])
     logging.info("101")
-    delta = (end - start).dt.days  # .apply(lambda x: x.days)
+    delta = (end - start).dt.days
     return delta
 
 
@@ -117,3 +117,8 @@ def add_int_feature(original_df, feature_df, feature_name):
 
 def add_binary_feature(original_df, feature_df, feature_name, one_value):
     feature_df[feature_name] = original_df[feature_name] == one_value
+
+def add_datetime_feature(original_df, feature_df, feature_name):
+
+    feature_df[str(feature_name) + ""] = pd.to_datetime(original_df[feature_name].str.slice(0, 10)).weekday()
+    return None

@@ -8,9 +8,9 @@ from tensorflow.keras.layers.experimental import preprocessing
 def build_and_compile_model(norm):
     model = tf.keras.Sequential([
         norm,
+        layers.Dense(64, activation='relu'),
         layers.Dense(128, activation='relu'),
-        layers.Dense(256, activation='relu'),
-        layers.Dense(128, activation='relu'),
+        layers.Dense(64, activation='relu'),
         layers.Dense(1)
     ])
 
