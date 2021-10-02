@@ -1,8 +1,6 @@
-import numpy as np
-import pandas as pd
 import logging
 
-from pandas import Timestamp
+import pandas as pd
 
 
 def preprocess(train_address, test_address, no_of_sample, save_to_file):
@@ -34,6 +32,8 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("13")
     add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
+    add_datetime_feature(original_df, feature_df, "acceptance_scan_timestamp")
+    logging.info("15")
     label = calculate_label(original_df[:train_end_index], "acceptance_scan_timestamp")
 
     feature_df = feature_df.fillna(0)
@@ -118,7 +118,11 @@ def add_int_feature(original_df, feature_df, feature_name):
 def add_binary_feature(original_df, feature_df, feature_name, one_value):
     feature_df[feature_name] = original_df[feature_name] == one_value
 
-def add_datetime_feature(original_df, feature_df, feature_name):
 
-    feature_df[str(feature_name) + ""] = pd.to_datetime(original_df[feature_name].str.slice(0, 10)).weekday()
+def add_datetime_feature(original_df, feature_df, feature_name):
+    feature_df[str(feature_name) + "_hour_of_day"] = pd.to_datetime(original_df[feature_name]).dt.hour
+    feature_df[str(feature_name) + "_day_of_week"] = pd.to_datetime(original_df[feature_name]).dt.dayofweek
+    feature_df[str(feature_name) + "_day_of_month"] = pd.to_datetime(original_df[feature_name]).dt.day
+    feature_df[str(feature_name) + "_month_of_year"] = pd.to_datetime(original_df[feature_name]).dt.month
+
     return None
