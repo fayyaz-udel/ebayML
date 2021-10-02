@@ -1,14 +1,15 @@
+import numpy as np
 import pandas as pd
-import swifter
 import logging
 
 from pandas import Timestamp
 
 
-def preprocess(address, save_to_file):
+def preprocess(train_address, test_address, save_to_file):
     logging.info("1")
-    original_df = load_dataset(address)
+    original_df, train_end_index = load_dataset(train_address, test_address)
     logging.info("2")
+    logging.info("train index: " + str(train_end_index))
     feature_df = create_empty_df()
     logging.info("3")
     add_binary_feature(original_df, feature_df, "b2c_c2c", "B2C")
@@ -27,13 +28,13 @@ def preprocess(address, save_to_file):
     logging.info("10")
     add_int_feature(original_df, feature_df, "weight")
     logging.info("11")
-    add_categorical_feature(original_df, feature_df, "shipment_method_id")
+    #add_categorical_feature(original_df, feature_df, "shipment_method_id")
     logging.info("12")
-    add_categorical_feature(original_df, feature_df, "category_id")
+    #add_categorical_feature(original_df, feature_df, "category_id")
     logging.info("13")
-    add_categorical_feature(original_df, feature_df, "package_size")
+    #add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
-    label = calculate_label(original_df)
+    label = calculate_label(original_df[:train_end_index])
 
     feature_df = feature_df.fillna(0)
     label = label.fillna(0)
@@ -45,23 +46,38 @@ def preprocess(address, save_to_file):
     if save_to_file:
         save_df(label, 'y')
 
-    return feature_df, label
+    return feature_df[:train_end_index], feature_df[train_end_index:], label
 
 
 def save_df(df, name):
     df.to_csv(str(name) + ".csv")
 
 
-def load_dataset(address):
-    return pd.read_csv(address, sep="\t")
+def load_dataset(train_address, test_address):
+    train_df = pd.read_csv(train_address, sep="\t")
+    train_df = clean_dataset(train_df)
+    test_df = pd.read_csv(test_address, sep="\t")
+    return pd.concat([train_df, test_df]), train_df.shape[0]
+
+
+def clean_dataset(df):
+    logging.info("30")
+    df = df[df["shipping_fee"] >= 0]
+    logging.info("31")
+    df = df[df["carrier_min_estimate"] >= 0]
+    logging.info("32")
+    df = df[df["carrier_max_estimate"] >= 0]
+    logging.info("33")
+    df = df[(pd.to_datetime(df["delivery_date"]) - pd.to_datetime(df["payment_datetime"].str.slice(0, 10))).dt.days >= 0]
+    return df
 
 
 def calculate_label(original_df):
-    start = pd.to_datetime(original_df["payment_datetime"].str.slice(0,10))#.apply(lambda x: x.date())
+    start = pd.to_datetime(original_df["payment_datetime"].str.slice(0, 10))  # .apply(lambda x: x.date())
     logging.info("100")
-    end = pd.to_datetime(original_df["delivery_date"])#.apply(lambda x: x.date())
+    end = pd.to_datetime(original_df["delivery_date"])  # .apply(lambda x: x.date())
     logging.info("101")
-    delta = (end - start).dt.days#.apply(lambda x: x.days)
+    delta = (end - start).dt.days  # .apply(lambda x: x.days)
     return delta
 
 
