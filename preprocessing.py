@@ -12,7 +12,7 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("3")
     add_binary_feature(original_df, feature_df, "b2c_c2c", "B2C")
     logging.info("4")
-    add_int_feature(original_df, feature_df, "declared_handling_days")
+    #add_int_feature(original_df, feature_df, "declared_handling_days")
     logging.info("5")
     add_int_feature(original_df, feature_df, "shipping_fee")
     logging.info("6")
@@ -28,7 +28,7 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("11")
     add_categorical_feature(original_df, feature_df, "shipment_method_id")
     logging.info("12")
-    add_categorical_feature(original_df, feature_df, "category_id")
+    #add_categorical_feature(original_df, feature_df, "category_id")
     logging.info("13")
     add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
@@ -36,8 +36,6 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("15")
     label = calculate_label(original_df[:train_end_index], "acceptance_scan_timestamp")
 
-    feature_df = feature_df.fillna(0)
-    label = label.fillna(0)
 
     logging.info("15")
     if save_to_file:
@@ -46,6 +44,7 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     if save_to_file:
         save_df(label, 'y')
 
+    logging.info(list(feature_df.columns))
     return feature_df[:train_end_index], feature_df[train_end_index:], label
 
 

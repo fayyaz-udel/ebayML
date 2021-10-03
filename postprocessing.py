@@ -5,7 +5,7 @@ import csv
 def calculate_delivery_date():
     quiz_label = pd.read_csv("./data/quiz_result.csv", header=None).round()[0].to_list()
     quiz_data = pd.read_csv("./data/quiz.tsv", sep="\t")
-    quiz_data = pd.to_datetime(quiz_data["payment_datetime"].str.slice(0, 10))
+    quiz_data = pd.to_datetime(quiz_data["acceptance_scan_timestamp"].str.slice(0, 10))
     out_file = open('./output.tsv', 'w+', newline='')
     tsv_writer = csv.writer(out_file, delimiter='\t')
 

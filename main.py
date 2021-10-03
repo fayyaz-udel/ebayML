@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.layers.experimental import preprocessing
 
@@ -12,28 +13,26 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-X, x_quiz, y = preprocess("./data/train.tsv", "./data/quiz.tsv", 1000000, False)
+X, x_quiz, y = preprocess("./data/train.tsv", "./data/quiz.tsv", 10000000, False)
 
 X = np.asarray(X).astype('float32')
+x_quiz = np.asarray(x_quiz).astype('float32')
+
+#normalizer = preprocessing.Normalization(axis=-1)
+#normalizer.adapt(np.array(X))
+#model = build_and_compile_model(normalizer)
+#history = train_model(model, X, y)
+#logging.info("start saving result for quiz set")
+#np.savetxt("./data/quiz_result.csv", model.predict(x_quiz), delimiter=",")
 
 
-normalizer = preprocessing.Normalization(axis=-1)
-normalizer.adapt(np.array(X))
+reg = GradientBoostingRegressor(verbose=2, max_depth=5)
+reg.fit(X, y)
+np.savetxt("./data/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
 
-model = build_and_compile_model(normalizer)
-history = train_model(model, X, y)
 
-print(model.predict(x_quiz))
-
-# np.savetxt("./data/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
 logging.info("finished")
 
-# logging.info("20")
 
-# logging.info("21")
-# #LogisticRegression(random_state=0)  #
-# #reg = make_pipeline(StandardScaler(),SGDRegressor(max_iter=1000, tol=1e-3, verbose=2), verbose=2)
-# reg = GradientBoostingRegressor(verbose=2)
-# logging.info("22")
-# reg.fit(X_train, y_train)
-# logging.info("23")
+
+

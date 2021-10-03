@@ -10,6 +10,7 @@ def build_and_compile_model(norm):
         norm,
         layers.Dense(64, activation='relu'),
         layers.Dense(128, activation='relu'),
+        layers.Dense(128, activation='relu'),
         layers.Dense(64, activation='relu'),
         layers.Dense(1)
     ])
@@ -22,7 +23,7 @@ def build_and_compile_model(norm):
 def train_model(dnn_model, train_features, train_labels):
     history = dnn_model.fit(
         train_features, train_labels,
-        validation_split=0.2,
-        verbose=2, epochs=100)
+        validation_split=0.1,
+        verbose=2, epochs=20)
 
     return history
