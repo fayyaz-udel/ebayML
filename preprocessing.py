@@ -30,7 +30,7 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("12")
     #add_categorical_feature(original_df, feature_df, "category_id")
     logging.info("13")
-    add_categorical_feature(original_df, feature_df, "package_size")
+    #add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
     add_datetime_feature(original_df, feature_df, "acceptance_scan_timestamp")
     logging.info("15")
