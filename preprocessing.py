@@ -71,19 +71,19 @@ def clean_dataset(df):
     df = df[df["carrier_max_estimate"] >= 0]
 
     df = df[
-        (pd.to_datetime(df["delivery_date"]) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10))).dt.days >= 0]
+        (pd.to_datetime(df["delivery_date"], infer_datetime_format=True) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True)).dt.days >= 0]
     logging.info("34")
     df = df[
-        (pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10)) - pd.to_datetime(
-            df["payment_datetime"].str.slice(0, 10))).dt.days >= 0]
+        (pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True) - pd.to_datetime(
+            df["payment_datetime"].str.slice(0, 10), infer_datetime_format=True)).dt.days >= 0]
 
     return df
 
 
 def calculate_label(original_df, start_point):
-    start = pd.to_datetime(original_df[start_point].str.slice(0, 10))
+    start = pd.to_datetime(original_df[start_point].str.slice(0, 10), infer_datetime_format=True)
     logging.info("100")
-    end = pd.to_datetime(original_df["delivery_date"])
+    end = pd.to_datetime(original_df["delivery_date"], infer_datetime_format=True)
     logging.info("101")
     delta = (end - start).dt.days
     return delta
@@ -121,7 +121,7 @@ def add_binary_feature(original_df, feature_df, feature_name, one_value):
 
 def add_datetime_feature(original_df, feature_df, feature_name):
     logging.info("30")
-    date_time = pd.to_datetime(original_df[feature_name].str.slice(0, 19))
+    date_time = pd.to_datetime(original_df[feature_name].str.slice(0, 19), infer_datetime_format=True)
     logging.info("31")
     feature_df[str(feature_name) + "_hour_of_day"] = date_time.dt.hour
     logging.info("32")
