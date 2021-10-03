@@ -121,7 +121,7 @@ def add_binary_feature(original_df, feature_df, feature_name, one_value):
 
 def add_datetime_feature(original_df, feature_df, feature_name):
     logging.info("30")
-    date_time = pd.to_datetime(original_df[feature_name])
+    date_time = pd.to_datetime(original_df[feature_name].str.slice(0, 19))
     logging.info("31")
     feature_df[str(feature_name) + "_hour_of_day"] = date_time.dt.hour
     logging.info("32")
