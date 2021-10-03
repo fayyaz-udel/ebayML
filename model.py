@@ -5,26 +5,22 @@ from tensorflow.keras import layers
 from tensorflow.keras.layers.experimental import preprocessing
 
 
-EPOCHS = 100
+EPOCHS = 50
 LR = 0.001
-BATCH = 256
+BATCH = 128
 
 
 def build_and_compile_model(norm):
     model = tf.keras.Sequential([
         norm,
         layers.Dense(128, activation='relu'),
-        #layers.BatchNormalization(),
-        layers.Dense(256, activation='relu'),
-        #layers.BatchNormalization(),
         layers.Dense(256, activation='relu'),
         layers.Dense(512, activation='relu'),
-        #layers.BatchNormalization(),
+        layers.Dense(1024, activation='relu'),
+        layers.Dense(1024, activation='relu'),
+        layers.Dense(512, activation='relu'),
+        layers.Dense(256, activation='relu'),
         layers.Dense(128, activation='relu'),
-        #layers.BatchNormalization(),
-        layers.Dense(64, activation='relu'),
-        #layers.BatchNormalization(),
-        layers.Dense(32, activation='relu'),
         layers.Dense(1)
     ])
 

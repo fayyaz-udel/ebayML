@@ -55,7 +55,7 @@ def save_df(df, name):
 def load_dataset(train_address, test_address, no_of_sample):
     train_df = pd.read_csv(train_address, sep="\t")
 
-    train_df = train_df[:no_of_sample]
+    #train_df = train_df[:no_of_sample]
     train_df = clean_dataset(train_df)
     test_df = pd.read_csv(test_address, sep="\t")
     return pd.concat([train_df, test_df]), train_df.shape[0]
