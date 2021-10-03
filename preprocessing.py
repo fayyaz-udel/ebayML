@@ -26,11 +26,11 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("10")
     add_int_feature(original_df, feature_df, "weight")
     logging.info("11")
-    # add_categorical_feature(original_df, feature_df, "shipment_method_id")
+    add_categorical_feature(original_df, feature_df, "shipment_method_id")
     logging.info("12")
-    #add_categorical_feature(original_df, feature_df, "category_id")
+    add_categorical_feature(original_df, feature_df, "category_id")
     logging.info("13")
-    #add_categorical_feature(original_df, feature_df, "package_size")
+    add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
     add_datetime_feature(original_df, feature_df, "acceptance_scan_timestamp")
     logging.info("15")
@@ -55,11 +55,10 @@ def save_df(df, name):
 
 def load_dataset(train_address, test_address, no_of_sample):
     train_df = pd.read_csv(train_address, sep="\t")
+
     train_df = train_df[:no_of_sample]
-    train_df = train_df.set_index('record_number')
     train_df = clean_dataset(train_df)
     test_df = pd.read_csv(test_address, sep="\t")
-    test_df = test_df.set_index('record_number')
     return pd.concat([train_df, test_df]), train_df.shape[0]
 
 
@@ -72,20 +71,19 @@ def clean_dataset(df):
     df = df[df["carrier_max_estimate"] >= 0]
 
     df = df[
-        (pd.to_datetime(df["delivery_date"], infer_datetime_format=True) - pd.to_datetime(
-            df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True)).dt.days >= 0]
+        (pd.to_datetime(df["delivery_date"]) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10))).dt.days >= 0]
     logging.info("34")
     df = df[
-        (pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True) - pd.to_datetime(
-            df["payment_datetime"].str.slice(0, 10), infer_datetime_format=True)).dt.days >= 0]
+        (pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10)) - pd.to_datetime(
+            df["payment_datetime"].str.slice(0, 10))).dt.days >= 0]
 
     return df
 
 
 def calculate_label(original_df, start_point):
-    start = pd.to_datetime(original_df[start_point].str.slice(0, 10), infer_datetime_format=True)
+    start = pd.to_datetime(original_df[start_point].str.slice(0, 10))
     logging.info("100")
-    end = pd.to_datetime(original_df["delivery_date"], infer_datetime_format=True)
+    end = pd.to_datetime(original_df["delivery_date"])
     logging.info("101")
     delta = (end - start).dt.days
     return delta
@@ -123,7 +121,7 @@ def add_binary_feature(original_df, feature_df, feature_name, one_value):
 
 def add_datetime_feature(original_df, feature_df, feature_name):
     logging.info("30")
-    date_time = pd.to_datetime(original_df[feature_name].str.slice(0, 19), infer_datetime_format=True)
+    date_time = pd.to_datetime(original_df[feature_name])
     logging.info("31")
     feature_df[str(feature_name) + "_hour_of_day"] = date_time.dt.hour
     logging.info("32")
@@ -132,3 +130,5 @@ def add_datetime_feature(original_df, feature_df, feature_name):
     feature_df[str(feature_name) + "_day_of_month"] = date_time.dt.day
     logging.info("34")
     feature_df[str(feature_name) + "_month_of_year"] = date_time.dt.month
+
+    return None
