@@ -35,7 +35,7 @@ for index, row in df.iterrows():
         distance = round(hs.haversine(buyer_zip_coor, item_zip_coor))
     else:
         distance = -100
-        print(str(counter), "error for ", row['buyer_zip'][:5], row['item_zip'][:5])
+        print(str(counter), "error for ", str(row['buyer_zip'])[:5], str(row['item_zip'])[:5])
         counter += 1
     df.at[index, 'distance'] = distance
 

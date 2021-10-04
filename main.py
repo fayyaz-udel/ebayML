@@ -1,12 +1,8 @@
 import logging
 
 import numpy as np
-import xgboost as xgb
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers.experimental import preprocessing
 
-from model import build_and_compile_model, train_model
 from postprocessing import calculate_delivery_date
 from preprocessing import preprocess
 
@@ -15,15 +11,15 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-X, x_quiz, y = preprocess("./data/train.tsv", "./data/quiz.tsv", 1100000, False)
+X, x_quiz, y = preprocess("./data/train_w_zip.tsv", "./data/quiz_w_zip.tsv", False)
 X = np.asarray(X).astype('float32')
 x_quiz = np.asarray(x_quiz).astype('float32')
 
 ##### Training Phase ####
-reg = GradientBoostingRegressor(verbose=2, max_depth=7, n_estimators=100)
+reg = GradientBoostingRegressor(verbose=2, max_depth=10, n_estimators=100)
 reg.fit(X, y)
 np.savetxt("./output/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
-np.savetxt("./data/feature_importance.csv", reg.feature_importances_, delimiter=",")
+np.savetxt("./output/feature_importance.csv", reg.feature_importances_, delimiter=",")
 
 
 # normalizer = preprocessing.Normalization(axis=-1)
