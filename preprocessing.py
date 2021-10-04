@@ -12,9 +12,11 @@ def preprocess(train_address, test_address, no_of_sample, save_to_file):
     logging.info("3")
     add_binary_feature(original_df, feature_df, "b2c_c2c", "B2C")
     logging.info("4")
-    #add_int_feature(original_df, feature_df, "declared_handling_days")
+    # add_int_feature(original_df, feature_df, "declared_handling_days")
     logging.info("5")
     add_int_feature(original_df, feature_df, "shipping_fee")
+    logging.info("5.5")
+    add_int_feature(original_df, feature_df, "distance")
     logging.info("6")
     add_int_feature(original_df, feature_df, "carrier_min_estimate")
     logging.info("7")
@@ -68,7 +70,7 @@ def clean_dataset(df):
     df = df[df["carrier_min_estimate"] >= 0]
     logging.info("32")
     df = df[df["carrier_max_estimate"] >= 0]
-
+    df = df[df["distance"] >= 0]
     df = df[
         (pd.to_datetime(df["delivery_date"], infer_datetime_format=True) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True)).dt.days >= 0]
     logging.info("34")

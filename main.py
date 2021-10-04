@@ -20,18 +20,18 @@ X = np.asarray(X).astype('float32')
 x_quiz = np.asarray(x_quiz).astype('float32')
 
 ##### Training Phase ####
-# reg = GradientBoostingRegressor(verbose=2, max_depth=10, n_estimators=10)
-# reg.fit(X, y)
-# np.savetxt("./data/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
-# np.savetxt("./data/feature_importance.csv", reg.feature_importances_, delimiter=",")
+reg = GradientBoostingRegressor(verbose=2, max_depth=7, n_estimators=100)
+reg.fit(X, y)
+np.savetxt("./output/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
+np.savetxt("./data/feature_importance.csv", reg.feature_importances_, delimiter=",")
 
 
-normalizer = preprocessing.Normalization(axis=-1)
-normalizer.adapt(np.array(X))
-model = build_and_compile_model(normalizer)
-history = train_model(model, X, y)
-logging.info("start saving result for quiz set")
-np.savetxt("./output/quiz_result.csv", model.predict(x_quiz), delimiter=",")
+# normalizer = preprocessing.Normalization(axis=-1)
+# normalizer.adapt(np.array(X))
+# model = build_and_compile_model(normalizer)
+# history = train_model(model, X, y)
+# logging.info("start saving result for quiz set")
+# np.savetxt("./output/quiz_result.csv", model.predict(x_quiz), delimiter=",")
 #########################
 
 
