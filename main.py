@@ -16,7 +16,7 @@ X = np.asarray(X).astype('float32')
 x_quiz = np.asarray(x_quiz).astype('float32')
 
 ##### Training Phase ####
-reg = GradientBoostingRegressor(verbose=2, max_depth=10, n_estimators=100)
+reg = GradientBoostingRegressor(verbose=2, max_depth=10, n_estimators=25)
 reg.fit(X, y)
 np.savetxt("./output/quiz_result.csv", reg.predict(x_quiz), delimiter=",")
 np.savetxt("./output/feature_importance.csv", reg.feature_importances_, delimiter=",")
