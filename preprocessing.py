@@ -12,7 +12,7 @@ def preprocess(train_address, test_address, save_to_file):
     logging.info("3")
     add_binary_feature(original_df, feature_df, "b2c_c2c", "B2C")
     logging.info("4")
-    # add_int_feature(original_df, feature_df, "declared_handling_days")
+    add_int_feature(original_df, feature_df, "declared_handling_days")
     logging.info("5")
     add_int_feature(original_df, feature_df, "shipping_fee")
     logging.info("5.5")
@@ -30,11 +30,13 @@ def preprocess(train_address, test_address, save_to_file):
     logging.info("11")
     add_categorical_feature(original_df, feature_df, "shipment_method_id")
     logging.info("12")
-    #add_categorical_feature(original_df, feature_df, "category_id")
+    add_categorical_feature(original_df, feature_df, "category_id")
     logging.info("13")
-    #add_categorical_feature(original_df, feature_df, "package_size")
+    add_categorical_feature(original_df, feature_df, "package_size")
     logging.info("14")
     add_datetime_feature(original_df, feature_df, "acceptance_scan_timestamp")
+    add_datetime_feature(original_df, feature_df, "payment_datetime")
+
     logging.info("15")
     label = calculate_label(original_df[:train_end_index], "acceptance_scan_timestamp")
 
@@ -56,12 +58,15 @@ def save_df(df, name):
 
 def load_dataset(train_address, test_address):
     train_df = pd.read_csv(train_address)#, sep="\t")
+    #train_df = train_df[:10000]
     train_df = clean_dataset(train_df)
     test_df = pd.read_csv(test_address)#, sep="\t")
     return pd.concat([train_df, test_df]), train_df.shape[0]
 
 
 def clean_dataset(df):
+    logging.info("29")
+    df["declared_handling_days"].fillna(df["declared_handling_days"].mean())
     logging.info("30")
     df = df[df["shipping_fee"] >= 0]
     logging.info("31")
@@ -70,7 +75,7 @@ def clean_dataset(df):
     df = df[df["carrier_max_estimate"] >= 0]
     df = df[df["distance"] >= 0]
     df = df[
-        (pd.to_datetime(df["delivery_date"], infer_datetime_format=True) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True)).dt.days >= 0]
+        (pd.to_datetime(df["delivery_date"], infer_datetime_format=True) - pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True)).dt.days > 0]
     logging.info("34")
     df = df[
         (pd.to_datetime(df["acceptance_scan_timestamp"].str.slice(0, 10), infer_datetime_format=True) - pd.to_datetime(
