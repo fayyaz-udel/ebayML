@@ -22,7 +22,7 @@ X = np.asarray(X).astype('float32')
 x_quiz = np.asarray(x_quiz).astype('float32')
 
 train_X, test_X, train_y, test_y = train_test_split(X, y,
-                                                    test_size=0.001)
+                                                    test_size=0.0001)
 ##### Training Phase ####
 model = XGBRegressor(n_estimators=1000, max_depth=8, verbosity=2, tree_method='gpu_hist')
 
