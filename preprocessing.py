@@ -12,6 +12,12 @@ def preprocess(train_address, test_address, save_to_file):
     logging.info("3")
     add_binary_feature(original_df, feature_df, "b2c_c2c", "B2C")
     logging.info("4")
+
+    add_int_feature(original_df, feature_df, "long1")
+    add_int_feature(original_df, feature_df, "lat1")
+    add_int_feature(original_df, feature_df, "long2")
+    add_int_feature(original_df, feature_df, "lat2")
+
     add_int_feature(original_df, feature_df, "declared_handling_days")
     logging.info("5")
     add_int_feature(original_df, feature_df, "shipping_fee")
@@ -58,7 +64,7 @@ def save_df(df, name):
 
 def load_dataset(train_address, test_address):
     train_df = pd.read_csv(train_address)#, sep="\t")
-    #train_df = train_df[:10000]
+    #train_df = train_df[:1000]
     train_df = clean_dataset(train_df)
     test_df = pd.read_csv(test_address)#, sep="\t")
     return pd.concat([train_df, test_df]), train_df.shape[0]

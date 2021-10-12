@@ -1,4 +1,6 @@
 import logging
+
+import xgboost
 import xgboost as xgb
 
 import numpy as np
@@ -22,9 +24,11 @@ x_quiz = np.asarray(x_quiz).astype('float32')
 train_X, test_X, train_y, test_y = train_test_split(X, y,
                                                     test_size=0.001)
 ##### Training Phase ####
-model = XGBRegressor(n_estimators=1000, max_depth=7, verbosity=2, tree_method='gpu_hist')
+model = XGBRegressor(n_estimators=1000, max_depth=8, verbosity=2, tree_method='gpu_hist')
 
-model.fit(train_X, train_y)
+model.fit(train_X, train_y, eval_set=[(test_X, test_y)],
+        eval_metric='mae',
+        verbose=True)
 pred = model.predict(test_X)
 pred_test = model.predict(train_X)
 test_mse = MSE(test_y, pred)
