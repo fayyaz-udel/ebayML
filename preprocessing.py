@@ -45,6 +45,7 @@ def load_dataset(train_address, test_address):
 
 
 def clean_dataset(df):
+
     df = df[df["shipping_fee"] >= 0]
     df = df[df["package_size"] != "NONE"]
     df = df[df["carrier_min_estimate"] >= 0]
