@@ -39,6 +39,7 @@ model = tf.keras.Sequential([
     layers.Dense(64, activation='relu'),
     layers.Dense(16, activation='relu'),
     layers.Dense(1)])
+#
 
 model.compile(metrics=[maebay], loss="mae", optimizer="adam")
 history = model.fit(X, y, validation_split=0.1, verbose=2, epochs=20, batch_size=128)
