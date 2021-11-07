@@ -4,29 +4,19 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.layers.experimental import preprocessing
 
-
-EPOCHS = 50
-LR = 0.001
-BATCH = 128
+EPOCHS = 100
+BATCH = 64
 
 
-def build_and_compile_model(norm):
+def build_and_compile_model():
     model = tf.keras.Sequential([
-        norm,
         layers.Dense(128, activation='relu'),
-        layers.Dense(256, activation='relu'),
-        layers.Dense(512, activation='relu'),
-        layers.Dense(1024, activation='relu'),
-        layers.Dense(1024, activation='relu'),
-        layers.Dense(512, activation='relu'),
-        layers.Dense(256, activation='relu'),
         layers.Dense(128, activation='relu'),
         layers.Dense(1)
     ])
 
-    model.compile(loss="mean_squared_error",
-                  optimizer=tf.keras.optimizers.Adam(LR))
-    print(model.summary())
+    model.compile(loss="mean_absolute_error",
+                  optimizer=tf.keras.optimizers.Adam())
     return model
 
 

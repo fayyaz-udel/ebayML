@@ -13,7 +13,7 @@ def preprocess(train_address, test_address):
     add_int_feature(original_df, feature_df, "lat1")
     add_int_feature(original_df, feature_df, "long2")
     add_int_feature(original_df, feature_df, "lat2")
-    add_int_feature(original_df, feature_df, "declared_handling_days")
+    #add_int_feature(original_df, feature_df, "declared_handling_days")
     add_int_feature(original_df, feature_df, "shipping_fee")
     add_int_feature(original_df, feature_df, "distance")
     add_int_feature(original_df, feature_df, "carrier_min_estimate")
@@ -23,14 +23,14 @@ def preprocess(train_address, test_address):
     add_int_feature(original_df, feature_df, "weight")
     #add_categorical_feature(original_df, feature_df, "seller_id")
     add_categorical_feature(original_df, feature_df, "shipment_method_id")
-    add_categorical_feature(original_df, feature_df, "category_id")
-    add_categorical_feature(original_df, feature_df, "package_size")
+    #add_categorical_feature(original_df, feature_df, "category_id")
+    #add_categorical_feature(original_df, feature_df, "package_size")
     add_datetime_feature(original_df, feature_df, "acceptance_scan_timestamp")
-    add_datetime_feature(original_df, feature_df, "payment_datetime")
+    #add_datetime_feature(original_df, feature_df, "payment_datetime")
     label = calculate_label(original_df[:train_end_index], "acceptance_scan_timestamp")
 
     logging.info(list(feature_df.columns))
-    return feature_df[:train_end_index], feature_df[train_end_index:], label
+    return feature_df[:train_end_index].fillna(0), feature_df[train_end_index:].fillna(0), label
 
 
 def save_df(df, name):
