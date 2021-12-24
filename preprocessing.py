@@ -13,24 +13,32 @@ def preprocess(train_address, test_address):
     add_int_feature(original_df, feature_df, "lat1")
     add_int_feature(original_df, feature_df, "long2")
     add_int_feature(original_df, feature_df, "lat2")
-    #add_int_feature(original_df, feature_df, "declared_handling_days")
+    # add_int_feature(original_df, feature_df, "declared_handling_days")
     add_int_feature(original_df, feature_df, "shipping_fee")
     add_int_feature(original_df, feature_df, "distance")
     add_int_feature(original_df, feature_df, "carrier_min_estimate")
     add_int_feature(original_df, feature_df, "carrier_max_estimate")
     add_int_feature(original_df, feature_df, "item_price")
     add_int_feature(original_df, feature_df, "quantity")
+
+    # original_df["weight"] = original_df["weight"].replace({0: None}) #FOR CATBOOST
     add_int_feature(original_df, feature_df, "weight")
-    #add_categorical_feature(original_df, feature_df, "seller_id")
-    add_categorical_feature(original_df, feature_df, "shipment_method_id")
-    #add_categorical_feature(original_df, feature_df, "category_id")
-    #add_categorical_feature(original_df, feature_df, "package_size")
+    # add_categorical_feature(original_df, feature_df, "seller_id")
+    add_int_feature(original_df, feature_df, "shipment_method_id")
+    add_int_feature(original_df, feature_df, "category_id")
+
+    original_df["package_size"] = original_df["package_size"].replace(
+        {"NONE": 0, "LETTER": 1, "PACKAGE_THICK_ENVELOPE": 2, "LARGE_ENVELOPE": 3, "LARGE_PACKAGE": 4,
+         "VERY_LARGE_PACKAGE": 4, "EXTRA_LARGE_PACKAGE": 4})
+    add_int_feature(original_df, feature_df, "package_size")
     add_datetime_feature(original_df, feature_df, "acceptance_scan_timestamp")
-    #add_datetime_feature(original_df, feature_df, "payment_datetime")
-    label = calculate_label(original_df[:train_end_index], "acceptance_scan_timestamp")
+    # add_datetime_feature(original_df, feature_df, "payment_datetime")
+
+    label = add_label(original_df[:train_end_index], "acceptance_scan_timestamp")
+    weight = add_weight(original_df[:train_end_index], "acceptance_scan_timestamp")
 
     logging.info(list(feature_df.columns))
-    return feature_df[:train_end_index].fillna(0), feature_df[train_end_index:].fillna(0), label
+    return feature_df[:train_end_index].fillna(0), feature_df[train_end_index:].fillna(0), label, weight
 
 
 def save_df(df, name):
@@ -45,9 +53,8 @@ def load_dataset(train_address, test_address):
 
 
 def clean_dataset(df):
-
     df = df[df["shipping_fee"] >= 0]
-    df = df[df["package_size"] != "NONE"]
+    #  df = df[df["package_size"] != "NONE"]
     df = df[df["carrier_min_estimate"] >= 0]
     df = df[df["carrier_max_estimate"] >= 0]
     df = df[df["distance"] >= 0]
@@ -61,7 +68,12 @@ def clean_dataset(df):
     return df
 
 
-def calculate_label(original_df, start_point):
+def add_weight(original_df, time_feature_name):
+    date_time = pd.to_datetime(original_df[time_feature_name].str.slice(0, 19), infer_datetime_format=True)
+    return (date_time.dt.year - 2017) + ((date_time.dt.month - 1) * 0.0909090)
+
+
+def add_label(original_df, start_point):
     start = pd.to_datetime(original_df[start_point].str.slice(0, 10), infer_datetime_format=True)
     end = pd.to_datetime(original_df["delivery_date"], infer_datetime_format=True)
     delta = (end - start).dt.days
@@ -73,21 +85,10 @@ def create_empty_df():
 
 
 def add_categorical_feature(original_df, feature_df, feature_name):
-    feature_df[feature_name] = original_df[feature_name]
-    # dummmies = pd.get_dummies(original_df[feature_name], prefix=feature_name)
-    # for col in dummmies:
-    #    feature_df[col] = dummmies[col]
-    # return feature_df
-
-
-def add_datetime_feature(original_df, feature_df, feature_name):
-    date_time = pd.to_datetime(original_df[feature_name].str.slice(0, 19), infer_datetime_format=True)
-    feature_df[str(feature_name) + 'day_week_sin'] = np.sin(date_time.dt.dayofweek * (2. * np.pi / 7))
-    feature_df[str(feature_name) + 'day_week_cos'] = np.cos(date_time.dt.dayofweek * (2. * np.pi / 7))
-    feature_df[str(feature_name) + 'day_sin'] = np.sin((date_time.dt.day - 1) * (2. * np.pi / 31))
-    feature_df[str(feature_name) + 'day_cos'] = np.cos((date_time.dt.day - 1) * (2. * np.pi / 31))
-    feature_df[str(feature_name) + 'mnth_sin'] = np.sin((date_time.dt.month - 1) * (2. * np.pi / 12))
-    feature_df[str(feature_name) + 'mnth_cos'] = np.cos((date_time.dt.month - 1) * (2. * np.pi / 12))
+    dummies = pd.get_dummies(original_df[feature_name], prefix=feature_name)
+    for col in dummies:
+        feature_df[col] = dummies[col]
+    return feature_df
 
 
 def add_int_feature(original_df, feature_df, feature_name):
@@ -104,9 +105,20 @@ def add_binary_feature(original_df, feature_df, feature_name, one_value):
 
 def add_datetime_feature(original_df, feature_df, feature_name):
     date_time = pd.to_datetime(original_df[feature_name].str.slice(0, 19), infer_datetime_format=True)
-    feature_df[str(feature_name) + 'day_week_sin'] = np.sin(date_time.dt.dayofweek * (2. * np.pi / 7))
-    feature_df[str(feature_name) + 'day_week_cos'] = np.cos(date_time.dt.dayofweek * (2. * np.pi / 7))
-    feature_df[str(feature_name) + 'day_sin'] = np.sin((date_time.dt.day - 1) * (2. * np.pi / 31))
-    feature_df[str(feature_name) + 'day_cos'] = np.cos((date_time.dt.day - 1) * (2. * np.pi / 31))
-    feature_df[str(feature_name) + 'mnth_sin'] = np.sin((date_time.dt.month - 1) * (2. * np.pi / 12))
-    feature_df[str(feature_name) + 'mnth_cos'] = np.cos((date_time.dt.month - 1) * (2. * np.pi / 12))
+    feature_df[str(feature_name) + '_hour'] = date_time.dt.hour
+    feature_df[str(feature_name) + '_day_week'] = date_time.dt.dayofweek
+    feature_df[str(feature_name) + '_day'] = date_time.dt.day
+    feature_df[str(feature_name) + '_month'] = date_time.dt.month
+    #feature_df[str(feature_name) + '_year'] = date_time.dt.year - 2017
+
+    feature_df[str(feature_name) + '_hour_sin'] = np.sin(date_time.dt.hour * (2. * np.pi / 24))
+    feature_df[str(feature_name) + '_hour_cos'] = np.cos(date_time.dt.hour * (2. * np.pi / 24))
+
+    feature_df[str(feature_name) + '_day_week_sin'] = np.sin(date_time.dt.dayofweek * (2. * np.pi / 7))
+    feature_df[str(feature_name) + '_day_week_cos'] = np.cos(date_time.dt.dayofweek * (2. * np.pi / 7))
+
+    feature_df[str(feature_name) + '_day_sin'] = np.sin((date_time.dt.day - 1) * (2. * np.pi / 31))
+    feature_df[str(feature_name) + '_day_cos'] = np.cos((date_time.dt.day - 1) * (2. * np.pi / 31))
+
+    feature_df[str(feature_name) + '_month_sin'] = np.sin((date_time.dt.month - 1) * (2. * np.pi / 12))
+    feature_df[str(feature_name) + '_month_cos'] = np.cos((date_time.dt.month - 1) * (2. * np.pi / 12))

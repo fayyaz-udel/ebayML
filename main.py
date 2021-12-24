@@ -1,10 +1,12 @@
 import logging
+from datetime import datetime
 
 import numpy as np
 import tensorflow as tf
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from tensorflow.keras import layers
-
+from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
+from tensorflow.keras.optimizers import Adam
 from postprocessing import calculate_delivery_date
 from preprocessing import preprocess
 import tensorflow.keras.backend as K
@@ -21,43 +23,41 @@ def maebay(y_true, y_pred):
     eval = K.mean(eval, axis=-1)
     return eval
 
-X, x_quiz, y = preprocess("./data/train.h5", "./data/quiz.h5")
+
+X, x_quiz, y, w = preprocess("./data/train.h5", "./data/quiz.h5")
 X = X[y < 20]
 y = y[y < 20]
 print(X.info())
+
 X = np.asarray(X).astype('float32')
 x_quiz = np.asarray(x_quiz).astype('float32')
 y = np.asarray(y).astype('float32')
-# train_X, test_X, train_y, test_y = train_test_split(X, y, test_size=0.1) TODO
+w = np.asarray(w).astype('float32')
+
+print("weight shape: ")
+print(w.shape)
 scaler = StandardScaler()
 scaler.fit(X)
 X = scaler.transform(X)
 x_quiz = scaler.transform(x_quiz)
+
 ##### Training Phase ####
+
 model = tf.keras.Sequential([
-    layers.Dense(64, activation='relu'),
-    layers.Dense(64, activation='relu'),
-    layers.Dense(16, activation='relu'),
-    layers.Dense(1)])
-#
+    layers.Dense(128, activation='relu'),
+    layers.Dense(128, activation='relu'),
+    layers.Dense(32, activation='relu'),
+    layers.Dense(8, activation='relu'),
+    layers.Dense(1, activation='linear')])
+
+earlyStopping = EarlyStopping(monitor='val_loss', patience=10 , verbose=1, mode='min', min_delta=1e-5)
+mcp_save = ModelCheckpoint('.mdl_wts.hdf5', save_best_only=True, monitor='val_loss', mode='min')
+reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, verbose=1, min_delta=1e-4, mode='min')
+#tensor_board = TensorBoard(log_dir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S"), histogram_freq=1)
+
 
 model.compile(metrics=[maebay], loss="mae", optimizer="adam")
-history = model.fit(X, y, validation_split=0.1, verbose=2, epochs=20, batch_size=128)
-
-# model = CatBoostRegressor(one_hot_max_size=100, n_estimators=2000, loss_function="MAE", depth=16, logging_level='info', task_type='GPU')
-# model.fit(train_X, train_y, cat_features=[9], eval_set=(test_X, test_y), logging_level='Verbose')
-
-
-# train_X, test_X, train_y, test_y = train_test_split(X, y, test_size=0.001)
-# model = CatBoostRegressor(one_hot_max_size=100, n_estimators=2000, loss_function="MAE", depth=16, logging_level='info', task_type='GPU')
-# model.fit(train_X, train_y, cat_features=[13, 14, 15], eval_set=(test_X, test_y), logging_level='Verbose')
-
-# pred = model.predict(test_X)
-# pred_test = model.predict(train_X)
-# test_mae = mean_absolute_error(test_y, pred) / 2
-# print("TEST MAE : % f" % (test_mae))
-# train_mae = mean_absolute_error(train_y, pred_test) / 2
-# print("TRAIN MAE : % f" % (train_mae))
+history = model.fit(X, y, validation_split=0.05, verbose=2, epochs=100, batch_size=128, sample_weight=w, callbacks=[reduce_lr_loss, mcp_save, earlyStopping])
 
 np.savetxt("./output/quiz_result.csv", model.predict(x_quiz), delimiter=",")
 
