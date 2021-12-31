@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+from sklearn.utils import shuffle
 
 
 def preprocess(train_address, test_address):
@@ -47,6 +48,9 @@ def save_df(df, name):
 
 def load_dataset(train_address, test_address):
     train_df = pd.read_hdf(train_address, 'df')
+    train_df = shuffle(train_df)
+    train_df = train_df.reset_index(drop=True)
+
     test_df = pd.read_hdf(test_address, 'df')
     train_df = clean_dataset(train_df)
     return pd.concat([train_df, test_df]), train_df.shape[0]
@@ -70,7 +74,7 @@ def clean_dataset(df):
 
 def add_weight(original_df, time_feature_name):
     date_time = pd.to_datetime(original_df[time_feature_name].str.slice(0, 19), infer_datetime_format=True)
-    return (date_time.dt.year - 2017) + ((date_time.dt.month - 1) * 0.0909090)
+    return (date_time.dt.year - 2017.5) + ((date_time.dt.month - 1) * 0.0909090) + (((date_time.dt.month - 10.1).apply(np.sign) + 1)/3)
 
 
 def add_label(original_df, start_point):
@@ -109,7 +113,7 @@ def add_datetime_feature(original_df, feature_df, feature_name):
     feature_df[str(feature_name) + '_day_week'] = date_time.dt.dayofweek
     feature_df[str(feature_name) + '_day'] = date_time.dt.day
     feature_df[str(feature_name) + '_month'] = date_time.dt.month
-    #feature_df[str(feature_name) + '_year'] = date_time.dt.year - 2017
+    feature_df[str(feature_name) + '_year'] = date_time.dt.year
 
     feature_df[str(feature_name) + '_hour_sin'] = np.sin(date_time.dt.hour * (2. * np.pi / 24))
     feature_df[str(feature_name) + '_hour_cos'] = np.cos(date_time.dt.hour * (2. * np.pi / 24))

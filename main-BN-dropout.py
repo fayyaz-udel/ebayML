@@ -51,9 +51,15 @@ x_quiz = scaler.transform(x_quiz)
 ##### Training Phase ####
 
 model = tf.keras.Sequential([
-    layers.Dense(256, activation='relu'),
-    layers.Dense(256, activation='relu'),
-    layers.Dense(64, activation='relu'),
+    layers.Dense(256, activation='linear'),
+    layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.Dense(256, activation='linear'),
+    layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.Dense(64, activation='linewar'),
+    layers.BatchNormalization(),
+    layers.ReLU(),
     layers.Dense(16, activation='relu'),
     layers.Dense(1, activation='linear')])
 
