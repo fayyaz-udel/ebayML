@@ -74,7 +74,7 @@ def clean_dataset(df):
 
 def add_weight(original_df, time_feature_name):
     date_time = pd.to_datetime(original_df[time_feature_name].str.slice(0, 19), infer_datetime_format=True)
-    return (date_time.dt.year - 2017.5) + ((date_time.dt.month - 1) * 0.0909090) + (((date_time.dt.month - 10.1).apply(np.sign) + 1)/3)
+    return (date_time.dt.year - 2017.5) + ((date_time.dt.month - 1) * 0.0909090)# + (((date_time.dt.month - 10.1).apply(np.sign) + 1)/3)
 
 
 def add_label(original_df, start_point):
