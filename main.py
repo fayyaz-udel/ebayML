@@ -9,7 +9,10 @@ from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, Re
 from postprocessing import calculate_delivery_date
 from preprocessing import preprocess
 
-TRAINING = True
+TRAINING = False
+TRAIN_PATH = "./data/train.h5"
+TEST_PATH = "./data/quiz-hamed.h5"
+MODEL_WEIGHT_PATH = './data/model_weights.hdf5'
 
 
 def maebay(y_true, y_pred):
@@ -26,7 +29,7 @@ def maebay(y_true, y_pred):
 
 ######################################## Preprocessing Data Phase #######################################
 # Load and preprocess dataset
-X, x_quiz, y, w = preprocess("./data/train.h5", "./data/quiztest.h5")
+X, x_quiz, y, w = preprocess(TRAIN_PATH, TEST_PATH)
 
 # Convert data to ndarrays
 X = np.asarray(X).astype('float32')
@@ -55,7 +58,7 @@ model = tf.keras.Sequential([
     layers.Dense(1, activation='linear')])
 
 earlyStopping = EarlyStopping(monitor='val_loss', patience=8, verbose=1, mode='min', min_delta=1e-5)
-mcp_save = ModelCheckpoint('./data/model_weights.hdf5', save_best_only=True, monitor='val_loss', mode='min')
+mcp_save = ModelCheckpoint(MODEL_WEIGHT_PATH, save_best_only=True, monitor='val_loss', mode='min')
 reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.05, patience=5, verbose=1, min_delta=1e-4, mode='min')
 # tensor_board = TensorBoard(log_dir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S"), histogram_freq=1)
 
@@ -65,9 +68,9 @@ if TRAINING:
     history = model.fit(X, y, verbose=2, epochs=75, batch_size=128, sample_weight=w, validation_split=0.05,
                         callbacks=[reduce_lr_loss, mcp_save, earlyStopping])
 else:
-    model = load_model('./data/model_weights.hdf5')
+    model = load_model(MODEL_WEIGHT_PATH, custom_objects={"maebay": maebay})
 
 ######################################## Prediction Phase #######################################
 predictions = model.predict(x_quiz)
 np.savetxt("./output/quiz_result.csv", predictions, delimiter=",")
-calculate_delivery_date()
+calculate_delivery_date(TEST_PATH)
