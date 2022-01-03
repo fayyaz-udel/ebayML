@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 import pandas as pd
 from sklearn.utils import shuffle
@@ -7,8 +5,8 @@ from sklearn.utils import shuffle
 
 def preprocess(train_address, test_address):
     original_df, train_end_index = load_dataset(train_address, test_address)
-    logging.info("train index: " + str(train_end_index))
     feature_df = create_empty_df()
+
     add_binary_feature(original_df, feature_df, "b2c_c2c", "B2C")
     add_int_feature(original_df, feature_df, "long1")
     add_int_feature(original_df, feature_df, "lat1")
@@ -25,7 +23,6 @@ def preprocess(train_address, test_address):
     # add_categorical_feature(original_df, feature_df, "seller_id")
     add_int_feature(original_df, feature_df, "shipment_method_id")
     add_int_feature(original_df, feature_df, "category_id")
-
     original_df["package_size"] = original_df["package_size"].replace(
         {"NONE": 0, "LETTER": 1, "PACKAGE_THICK_ENVELOPE": 2, "LARGE_ENVELOPE": 3, "LARGE_PACKAGE": 4,
          "VERY_LARGE_PACKAGE": 4, "EXTRA_LARGE_PACKAGE": 4})
@@ -36,8 +33,15 @@ def preprocess(train_address, test_address):
     label = add_label(original_df[:train_end_index], "acceptance_scan_timestamp")
     weight = add_weight(original_df[:train_end_index], "acceptance_scan_timestamp")
 
-    logging.info(list(feature_df.columns))
-    return feature_df[:train_end_index].fillna(0), feature_df[train_end_index:].fillna(0), label, weight
+    X = feature_df[:train_end_index].fillna(0)
+    x_quiz = feature_df[train_end_index:].fillna(0)
+
+    X = X[label < 20]
+    weight = weight[label < 20]
+    label = label[label < 20]
+
+    print(X.info())
+    return X, x_quiz, label, weight
 
 
 def save_df(df, name):
@@ -72,7 +76,8 @@ def clean_dataset(df):
 
 def add_weight(original_df, time_feature_name):
     date_time = pd.to_datetime(original_df[time_feature_name].str.slice(0, 19), infer_datetime_format=True)
-    return (date_time.dt.year - 2017.5) + ((date_time.dt.month - 1) * 0.0909090)# + (((date_time.dt.month - 10.1).apply(np.sign) + 1)/3)
+    return (date_time.dt.year - 2017.5) + (
+                (date_time.dt.month - 1) * 0.0909090)  # + (((date_time.dt.month - 10.1).apply(np.sign) + 1)/3)
 
 
 def add_label(original_df, start_point):
