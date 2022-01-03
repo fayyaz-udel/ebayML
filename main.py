@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
+from keras.models import load_model
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras import layers
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
@@ -51,9 +52,15 @@ x_quiz = scaler.transform(x_quiz)
 ##### Training Phase ####
 
 model = tf.keras.Sequential([
-    layers.Dense(256, activation='relu'),
-    layers.Dense(256, activation='relu'),
-    layers.Dense(64, activation='relu'),
+    layers.Dense(256, activation='linear'),
+    layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.Dense(256, activation='linear'),
+    layers.BatchNormalization(),
+    layers.ReLU(),
+    layers.Dense(64, activation='linear'),
+    layers.BatchNormalization(),
+    layers.ReLU(),
     layers.Dense(16, activation='relu'),
     layers.Dense(1, activation='linear')])
 
@@ -64,8 +71,11 @@ reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.05, patience=5, 
 
 
 model.compile(metrics=[maebay], loss="mae", optimizer="adam")
-history = model.fit(X, y, verbose=2, epochs=100, batch_size=128, sample_weight=w, validation_split=0.05,
+history = model.fit(X, y, verbose=2, epochs=75, batch_size=128, sample_weight=w, validation_split=0.05,
                     callbacks=[reduce_lr_loss, mcp_save, earlyStopping])
+
+
+model = load_model('.mdl_wts.hdf5')
 
 np.savetxt("./output/quiz_result.csv", model.predict(x_quiz), delimiter=",")
 

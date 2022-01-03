@@ -3,17 +3,21 @@ import logging
 import haversine as hs
 import pandas as pd
 
+FILE_NAME = "quiztest"
+
+
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
+
+
 zip_df = pd.read_csv("./data/zipcode.txt", sep='\t', header=None)
 lat_long = tuple(zip(zip_df[9].tolist(), zip_df[10].tolist()))
 zip_code = zip_df[1].tolist()
 z = {zip_code[i]: lat_long[i] for i in range(len(zip_df.index))}
 
-data_name = "train"
-df = pd.read_csv("./data/" + data_name + ".tsv", sep="\t")
+df = pd.read_csv("./data/" + FILE_NAME + ".tsv", sep="\t")
 
 df['distance'] = ""
 df['long1'] = ""
@@ -57,4 +61,4 @@ for index, row in df.iterrows():
     df.at[index, 'lat2'] = lat2
 
 
-df.to_csv("./data/" + data_name + "_w_zip.tsv")
+df.to_hdf("./data/" + FILE_NAME + ".h5", key='df', mode='w')
