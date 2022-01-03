@@ -21,8 +21,6 @@ def preprocess(train_address, test_address):
     add_int_feature(original_df, feature_df, "carrier_max_estimate")
     add_int_feature(original_df, feature_df, "item_price")
     add_int_feature(original_df, feature_df, "quantity")
-
-    # original_df["weight"] = original_df["weight"].replace({0: None}) #FOR CATBOOST
     add_int_feature(original_df, feature_df, "weight")
     # add_categorical_feature(original_df, feature_df, "seller_id")
     add_int_feature(original_df, feature_df, "shipment_method_id")
@@ -113,7 +111,6 @@ def add_datetime_feature(original_df, feature_df, feature_name):
     feature_df[str(feature_name) + '_day_week'] = date_time.dt.dayofweek
     feature_df[str(feature_name) + '_day'] = date_time.dt.day
     feature_df[str(feature_name) + '_month'] = date_time.dt.month
-    feature_df[str(feature_name) + '_year'] = date_time.dt.year
 
     feature_df[str(feature_name) + '_hour_sin'] = np.sin(date_time.dt.hour * (2. * np.pi / 24))
     feature_df[str(feature_name) + '_hour_cos'] = np.cos(date_time.dt.hour * (2. * np.pi / 24))

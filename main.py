@@ -24,14 +24,11 @@ def maebay(y_true, y_pred):
     return eval
 
 
-X, x_quiz, y, w = preprocess("./data/train.h5", "./data/quiz.h5")
+X, x_quiz, y, w = preprocess("./data/train.h5", "./data/quiztest.h5")
 
 X = X[y < 20]
 w = w[y < 20]
 y = y[y < 20]
-
-X.drop(columns=['acceptance_scan_timestamp_year'], inplace=True)
-x_quiz.drop(columns=['acceptance_scan_timestamp_year'], inplace=True)
 
 print(X.info())
 
@@ -65,17 +62,17 @@ model = tf.keras.Sequential([
     layers.Dense(1, activation='linear')])
 
 earlyStopping = EarlyStopping(monitor='val_loss', patience=8, verbose=1, mode='min', min_delta=1e-5)
-mcp_save = ModelCheckpoint('.mdl_wts.hdf5', save_best_only=True, monitor='val_loss', mode='min')
+mcp_save = ModelCheckpoint('./data/model_weights.hdf5', save_best_only=True, monitor='val_loss', mode='min')
 reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.05, patience=5, verbose=1, min_delta=1e-4, mode='min')
 # tensor_board = TensorBoard(log_dir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S"), histogram_freq=1)
 
 
 model.compile(metrics=[maebay], loss="mae", optimizer="adam")
-history = model.fit(X, y, verbose=2, epochs=75, batch_size=128, sample_weight=w, validation_split=0.05,
+history = model.fit(X, y, verbose=2, epochs=100, batch_size=128, sample_weight=w, validation_split=0.05,
                     callbacks=[reduce_lr_loss, mcp_save, earlyStopping])
 
 
-model = load_model('.mdl_wts.hdf5')
+model = load_model('./data/model_weights.hdf5')
 
 np.savetxt("./output/quiz_result.csv", model.predict(x_quiz), delimiter=",")
 
