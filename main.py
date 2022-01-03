@@ -10,8 +10,7 @@ from postprocessing import calculate_delivery_date
 from preprocessing import preprocess
 
 TRAINING = False
-TRAIN_PATH = "./data/train.h5"
-TEST_PATH = "./data/quiz-hamed.h5"
+TEST_FILE_NAME = "quiz-hamed"
 MODEL_WEIGHT_PATH = './data/model_weights.hdf5'
 
 
@@ -29,7 +28,7 @@ def maebay(y_true, y_pred):
 
 ######################################## Preprocessing Data Phase #######################################
 # Load and preprocess dataset
-X, x_quiz, y, w = preprocess(TRAIN_PATH, TEST_PATH)
+X, x_quiz, y, w = preprocess("./data/train.h5", "./data/" + TEST_FILE_NAME + ".h5")
 
 # Convert data to ndarrays
 X = np.asarray(X).astype('float32')
@@ -73,4 +72,4 @@ else:
 ######################################## Prediction Phase #######################################
 predictions = model.predict(x_quiz)
 np.savetxt("./output/quiz_result.csv", predictions, delimiter=",")
-calculate_delivery_date(TEST_PATH)
+calculate_delivery_date("./data/" + TEST_FILE_NAME + ".tsv")
