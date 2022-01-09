@@ -17,7 +17,7 @@ def calculate_delivery_date(tsv_path):
         if pd.isna(quiz_label[index]):
             quiz_label[index] = average[index]
         tsv_writer.writerow([str(15000001 + index), str(value + pd.Timedelta(days=quiz_label[index]))[:10]])
-        if index % 10000 == 0:
+        if index % 100000 == 0:
             print(index)
     out_file.flush()
     out_file.close()

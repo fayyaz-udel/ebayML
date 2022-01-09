@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from tensorflow.keras import layers
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
+from model import build_model
 from postprocessing import calculate_delivery_date
 from preprocessing import preprocess
 
@@ -42,19 +43,7 @@ X = scaler.transform(X)
 x_quiz = scaler.transform(x_quiz)
 
 ######################################## Training Phase #######################################
-
-model = tf.keras.Sequential([
-    layers.Dense(256, activation='linear'),
-    layers.BatchNormalization(),
-    layers.ReLU(),
-    layers.Dense(256, activation='linear'),
-    layers.BatchNormalization(),
-    layers.ReLU(),
-    layers.Dense(64, activation='linear'),
-    layers.BatchNormalization(),
-    layers.ReLU(),
-    layers.Dense(16, activation='relu'),
-    layers.Dense(1, activation='linear')])
+model = build_model()
 
 earlyStopping = EarlyStopping(monitor='val_loss', patience=8, verbose=1, mode='min', min_delta=1e-5)
 mcp_save = ModelCheckpoint(MODEL_WEIGHT_PATH, save_best_only=True, monitor='val_loss', mode='min')
@@ -64,10 +53,11 @@ reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.05, patience=5, 
 
 if TRAINING:
     model.compile(metrics=[maebay], loss="mae", optimizer="adam")
-    history = model.fit(X, y, verbose=2, epochs=75, batch_size=128, sample_weight=w, validation_split=0.05,
+    history = model.fit(X, y, verbose=2, epochs=100, batch_size=2048, sample_weight=w, validation_split=0.05,
                         callbacks=[reduce_lr_loss, mcp_save, earlyStopping])
-else:
-    model = load_model(MODEL_WEIGHT_PATH, custom_objects={"maebay": maebay})
+
+
+model = load_model(MODEL_WEIGHT_PATH, custom_objects={"maebay": maebay})
 
 ######################################## Prediction Phase #######################################
 predictions = model.predict(x_quiz)
